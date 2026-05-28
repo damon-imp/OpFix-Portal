@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Actions | OpFix Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/portal.css">
+<style>
+/* ── SUMMARY STRIP ── */
+.summary-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:20px;
+}
+.summary-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  padding:14px 14px;
+}
+.summary-card.severe{
+  border-color:rgba(200,30,45,.30);
+  background:linear-gradient(180deg,rgba(200,30,45,.05),var(--surface) 60%);
+}
+.summary-card-label{
+  font-size:10px;font-weight:600;
+  letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.summary-card.severe .summary-card-label{color:var(--severe)}
+.summary-card-value{
+  font-family:var(--font-mono);
+  font-size:24px;font-weight:700;
+  color:var(--text-strong);
+  letter-spacing:-1px;line-height:1;
+}
+.summary-card.severe .summary-card-value{color:var(--severe)}
+.summary-card-sub{
+  font-size:11px;color:var(--muted);margin-top:4px;
+}
+
+/* ── TAB SWITCHER ── */
+.action-tabs{
+  display:flex;gap:4px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:12px;
+  padding:4px;
+  margin-bottom:14px;
+  overflow-x:auto;
+}
+.action-tab{
+  flex:1;min-width:max-content;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:13px;font-weight:600;
+  color:var(--muted);
+  white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  transition:background .15s,color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.action-tab .count{
+  background:rgba(255,255,255,.06);
+  padding:2px 7px;border-radius:100px;
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:700;
+  letter-spacing:.3px;
+}
+.action-tab.active{background:rgba(59,130,246,.12);color:var(--brand-blue)}
+.action-tab.active .count{background:rgba(59,130,246,.20);color:var(--brand-blue)}
+.action-tab:not(.active):hover{color:var(--text)}
+
+/* ── FILTER ROW ── */
+.filter-row{
+  display:flex;gap:8px;
+  margin-bottom:14px;flex-wrap:wrap;
+}
+.filter-chip{
+  padding:7px 13px;border-radius:100px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  font-size:12px;font-weight:600;
+  color:var(--muted);
+  transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.filter-chip.active{
+  background:rgba(59,130,246,.10);
+  border-color:rgba(59,130,246,.30);
+  color:var(--brand-blue);
+}
+.filter-chip:not(.active):hover{color:var(--text)}
+
+/* ── ACTION ITEM (richer than cockpit version) ── */
+.actions-list{display:flex;flex-direction:column;gap:10px}
+.action{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  padding:18px 18px 16px 20px;
+  position:relative;overflow:hidden;
+  transition:border-color .15s;
+}
+.action:hover{border-color:var(--hairline-2)}
+.action.overdue{
+  border-color:rgba(200,30,45,.30);
+  background:linear-gradient(90deg,rgba(200,30,45,.04),var(--surface) 30%);
+}
+.action.overdue::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--severe);
+}
+
+.action-top{
+  display:flex;align-items:flex-start;gap:14px;
+  margin-bottom:12px;
+}
+.action-owner{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+}
+.action-owner.you{background:rgba(59,130,246,.10);color:var(--brand-blue);border:1px solid rgba(59,130,246,.20)}
+.action-owner.us{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--hairline-2)}
+
+.action-main{flex:1;min-width:0}
+.action-title{
+  font-size:15px;font-weight:600;color:var(--text-strong);
+  line-height:1.35;margin-bottom:4px;
+}
+.action-meta{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.action-meta .sep{opacity:.4}
+.action-meta .due-overdue{color:var(--severe);font-weight:700}
+.action-meta .due-soon{color:var(--warn);font-weight:600}
+.action-meta .pillar-tag{
+  font-weight:600;
+}
+.action-meta .pillar-tag.p1{color:var(--pillar-ops)}
+.action-meta .pillar-tag.p2{color:var(--pillar-rev)}
+.action-meta .pillar-tag.p3{color:var(--pillar-fin)}
+.action-meta .pillar-tag.p4{color:var(--pillar-team)}
+
+.action-desc{
+  font-size:13px;color:var(--text);line-height:1.5;
+  margin-bottom:14px;padding-left:52px;
+}
+
+.action-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-top:12px;padding-left:52px;
+  border-top:1px solid var(--hairline);
+}
+.action-context{
+  font-size:11px;color:var(--muted);
+  display:flex;align-items:center;gap:6px;
+}
+.action-context-icon{
+  width:14px;height:14px;
+  color:var(--muted);
+}
+.action-context-icon svg{width:14px;height:14px;stroke-width:2}
+.action-buttons{display:flex;gap:8px;flex-shrink:0}
+.action-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:8px;
+  font-size:12px;font-weight:600;
+  transition:background .15s,color .15s;
+}
+.action-btn-primary{
+  background:var(--brand-blue);color:#fff;
+}
+.action-btn-primary:hover{background:var(--blue-dark)}
+.action-btn-secondary{
+  background:rgba(255,255,255,.04);color:var(--text);
+  border:1px solid var(--hairline-2);
+}
+.action-btn-secondary:hover{background:rgba(255,255,255,.08)}
+.action-btn svg{width:12px;height:12px;stroke-width:2.4}
+
+@media (max-width:520px){
+  .action-desc{padding-left:0}
+  .action-footer{padding-left:0;flex-wrap:wrap}
+}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  padding:48px 20px;text-align:center;
+  background:var(--surface);
+  border:1px dashed var(--hairline-2);
+  border-radius:14px;
+}
+.empty-state-icon{
+  width:56px;height:56px;border-radius:14px;margin:0 auto 16px;
+  background:rgba(16,185,129,.10);color:var(--good);
+  display:flex;align-items:center;justify-content:center;
+}
+.empty-state-icon svg{width:26px;height:26px;stroke-width:1.8}
+.empty-state-title{
+  font-family:var(--font-display);
+  font-size:18px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.2px;margin-bottom:6px;
+}
+.empty-state-text{font-size:13px;color:var(--muted);max-width:300px;margin:0 auto;line-height:1.5}
+
+/* ── COMPLETED COLLAPSED LIST ── */
+.completed-toggle{
+  margin-top:20px;
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:12px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.completed-toggle-icon{
+  width:32px;height:32px;border-radius:9px;
+  background:rgba(16,185,129,.10);color:var(--good);
+  display:flex;align-items:center;justify-content:center;
+}
+.completed-toggle-icon svg{width:14px;height:14px;stroke-width:2.5}
+.completed-toggle-body{flex:1}
+.completed-toggle-label{font-size:13px;font-weight:600;color:var(--text-strong)}
+.completed-toggle-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.completed-toggle-chevron{color:var(--muted)}
+.completed-toggle-chevron svg{width:16px;height:16px;stroke-width:2;transition:transform .2s}
+.completed-toggle.open .completed-toggle-chevron svg{transform:rotate(180deg)}
+.completed-list{display:none;margin-top:10px;flex-direction:column;gap:10px}
+.completed-toggle.open + .completed-list{display:flex}
+.completed-item{
+  padding:14px 18px;
+  background:rgba(255,255,255,.015);
+  border:1px solid var(--hairline);
+  border-radius:12px;
+  display:flex;align-items:center;gap:14px;
+  opacity:.7;
+}
+.completed-item-check{
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(16,185,129,.15);color:var(--good);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.completed-item-check svg{width:14px;height:14px;stroke-width:3}
+.completed-item-body{flex:1;min-width:0}
+.completed-item-title{
+  font-size:13px;font-weight:600;color:var(--text);
+  text-decoration:line-through;text-decoration-color:var(--hairline-2);
+}
+.completed-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── DESKTOP ── */
+@media (min-width:768px){
+  .summary-strip{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div id="portal-nav" data-active="actions"></div>
+
+<main class="page">
+
+  <div class="greeting fade d1">
+    <div class="greeting-eyebrow">Action Items</div>
+    <h1 class="greeting-h1">What's Open</h1>
+    <p class="greeting-sub">Everything that needs attention right now</p>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip fade d2">
+    <div class="summary-card severe">
+      <div class="summary-card-label">Overdue</div>
+      <div class="summary-card-value">1</div>
+      <div class="summary-card-sub">needs immediate action</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Owed by you</div>
+      <div class="summary-card-value">3</div>
+      <div class="summary-card-sub">1 due this week</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-label">Owed by OpFix</div>
+      <div class="summary-card-value">5</div>
+      <div class="summary-card-sub">2 in progress</div>
+    </div>
+    <div class="summary-card" style="display:none">
+      <div class="summary-card-label">Completed</div>
+      <div class="summary-card-value">42</div>
+      <div class="summary-card-sub">since Day 1</div>
+    </div>
+  </div>
+
+  <!-- Tab switcher -->
+  <div class="action-tabs fade d2" role="tablist">
+    <button class="action-tab active" data-tab="all">All <span class="count">8</span></button>
+    <button class="action-tab" data-tab="you">Owed by you <span class="count">3</span></button>
+    <button class="action-tab" data-tab="us">Owed by OpFix <span class="count">5</span></button>
+  </div>
+
+  <!-- Filter row -->
+  <div class="filter-row fade d3">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="week">This week</button>
+    <button class="filter-chip" data-filter="overdue">Overdue</button>
+    <button class="filter-chip" data-filter="p1">Operations</button>
+    <button class="filter-chip" data-filter="p2">Revenue</button>
+    <button class="filter-chip" data-filter="p3">Financial</button>
+    <button class="filter-chip" data-filter="p4">Team</button>
+  </div>
+
+  <!-- Actions list -->
+  <div class="actions-list">
+
+    <div class="action overdue fade d3" data-owner="you" data-pillar="p3">
+      <div class="action-top">
+        <div class="action-owner you">YOU</div>
+        <div class="action-main">
+          <div class="action-title">Sign off on SOP-04: Cash Reporting Cadence</div>
+          <div class="action-meta">
+            <span class="pillar-tag p3">Pillar 3 · Financial</span>
+            <span class="sep">·</span>
+            <span class="due-overdue">Overdue by 2 days</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Weekly cash position reporting cadence. Review the draft, leave comments if needed, sign off to lock the cadence into the operating system.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg></span>
+          <span>SOP-04-draft.pdf</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">Review</a>
+          <a href="#" class="action-btn action-btn-primary">Sign Off <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d4" data-owner="you" data-pillar="p4">
+      <div class="action-top">
+        <div class="action-owner you">YOU</div>
+        <div class="action-main">
+          <div class="action-title">Approve hiring scorecard draft for Ops Manager role</div>
+          <div class="action-meta">
+            <span class="pillar-tag p4">Pillar 4 · Team</span>
+            <span class="sep">·</span>
+            <span class="due-soon">Due in 3 days</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Scorecard includes mission, outcomes, and competencies for the Ops Manager hire. Approve or request edits before we open the role.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg></span>
+          <span>scorecard-ops-mgr.pdf</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">Review</a>
+          <a href="#" class="action-btn action-btn-primary">Approve</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d4" data-owner="you" data-pillar="p2">
+      <div class="action-top">
+        <div class="action-owner you">YOU</div>
+        <div class="action-main">
+          <div class="action-title">Provide last 6 months of revenue data for forecast model</div>
+          <div class="action-meta">
+            <span class="pillar-tag p2">Pillar 2 · Revenue</span>
+            <span class="sep">·</span>
+            <span>Due in 5 days</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        We need monthly revenue by product line plus channel attribution to calibrate the forecast model. Drop the CSV in the upload below or share via Drive.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></span>
+          <span>Upload requested</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-primary">Upload CSV</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d5" data-owner="us" data-pillar="p2">
+      <div class="action-top">
+        <div class="action-owner us">OPFIX</div>
+        <div class="action-main">
+          <div class="action-title">Delivering Revenue Forecast Dashboard build</div>
+          <div class="action-meta">
+            <span class="pillar-tag p2">Pillar 2 · Revenue</span>
+            <span class="sep">·</span>
+            <span>ETA Day 74</span>
+            <span class="sep">·</span>
+            <span>In progress</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Build is underway. Dashboard will pull live data from your CRM and surface pipeline coverage, weighted forecast, and conversion velocity by stage.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
+          <span>7 days to delivery</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">View progress</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d5" data-owner="us" data-pillar="p1">
+      <div class="action-top">
+        <div class="action-owner us">OPFIX</div>
+        <div class="action-main">
+          <div class="action-title">Drafting SOP-05: Operational Reporting Cadence</div>
+          <div class="action-meta">
+            <span class="pillar-tag p1">Pillar 1 · Operations</span>
+            <span class="sep">·</span>
+            <span>ETA Day 82</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Standing reporting rhythm across the operating team. Will follow the same structure as SOP-04 with role-specific dashboards layered in.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
+          <span>15 days to delivery</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">View brief</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d6" data-owner="us" data-pillar="p3">
+      <div class="action-top">
+        <div class="action-owner us">OPFIX</div>
+        <div class="action-main">
+          <div class="action-title">Queued: SOP-06 - Margin Reporting</div>
+          <div class="action-meta">
+            <span class="pillar-tag p3">Pillar 3 · Financial</span>
+            <span class="sep">·</span>
+            <span>Build sprint 2</span>
+            <span class="sep">·</span>
+            <span>Start Day 75</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Gross margin reporting cadence tied into the existing P&L. Will integrate with the forecast dashboard for real-time margin visibility.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 6v12M19 6v12M5 12h14"/></svg></span>
+          <span>Queued</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">View brief</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d6" data-owner="us" data-pillar="p4">
+      <div class="action-top">
+        <div class="action-owner us">OPFIX</div>
+        <div class="action-main">
+          <div class="action-title">Drafting Ops Manager job posting and outbound sourcing list</div>
+          <div class="action-meta">
+            <span class="pillar-tag p4">Pillar 4 · Team</span>
+            <span class="sep">·</span>
+            <span>ETA Day 78</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Pulls from the approved scorecard above. We'll also build a targeted outbound list and a screening process for first-round interviews.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
+          <span>11 days to delivery</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">View brief</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="action fade d6" data-owner="us" data-pillar="p2">
+      <div class="action-top">
+        <div class="action-owner us">OPFIX</div>
+        <div class="action-main">
+          <div class="action-title">Pipeline visibility rebuild · Days 85-100</div>
+          <div class="action-meta">
+            <span class="pillar-tag p2">Pillar 2 · Revenue</span>
+            <span class="sep">·</span>
+            <span>Build sprint 3</span>
+          </div>
+        </div>
+      </div>
+      <div class="action-desc">
+        Full rebuild of pipeline architecture with new stages, exit criteria, and forecast weights. Will require CRM data cleanup beforehand.
+      </div>
+      <div class="action-footer">
+        <div class="action-context">
+          <span class="action-context-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 6v12M19 6v12M5 12h14"/></svg></span>
+          <span>Queued</span>
+        </div>
+        <div class="action-buttons">
+          <a href="#" class="action-btn action-btn-secondary">View brief</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Completed (collapsed) -->
+  <div class="completed-toggle fade d6" onclick="this.classList.toggle('open')">
+    <div class="completed-toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div>
+    <div class="completed-toggle-body">
+      <div class="completed-toggle-label">Completed Actions</div>
+      <div class="completed-toggle-sub">42 actions cleared since Day 1</div>
+    </div>
+    <div class="completed-toggle-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></div>
+  </div>
+  <div class="completed-list">
+    <div class="completed-item">
+      <div class="completed-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div class="completed-item-body">
+        <div class="completed-item-title">Sign off on SOP-03: Daily Standup Cadence</div>
+        <div class="completed-item-meta">Pillar 1 · Operations · Completed Day 64</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div class="completed-item-body">
+        <div class="completed-item-title">Delivered SOP-03 build</div>
+        <div class="completed-item-meta">Pillar 1 · Operations · Completed Day 62</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div class="completed-item-body">
+        <div class="completed-item-title">Sign off on hiring scorecard: Senior Account Executive</div>
+        <div class="completed-item-meta">Pillar 4 · Team · Completed Day 58</div>
+      </div>
+    </div>
+    <div class="completed-item">
+      <div class="completed-item-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div>
+      <div class="completed-item-body">
+        <div class="completed-item-title">Delivered SOP-02: Vendor Management</div>
+        <div class="completed-item-meta">Pillar 1 · Operations · Completed Day 55</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="shared/portal-nav.js"></script>
+<script src="shared/portal-demo.js"></script>
+<script>
+// Tab + filter logic
+const tabs = document.querySelectorAll('.action-tab');
+const chips = document.querySelectorAll('.filter-chip');
+const items = document.querySelectorAll('.action');
+
+let currentTab = 'all';
+let currentFilter = 'all';
+
+function applyFilters(){
+  items.forEach(item=>{
+    const owner = item.dataset.owner;
+    const pillar = item.dataset.pillar;
+    const overdue = item.classList.contains('overdue');
+
+    let visible = true;
+    if(currentTab!=='all' && currentTab!==owner) visible = false;
+    if(currentFilter==='overdue' && !overdue) visible = false;
+    if(['p1','p2','p3','p4'].includes(currentFilter) && pillar!==currentFilter) visible = false;
+    // 'week' filter: data-attribute-based filtering, deferred - wire to date logic when API live
+
+    item.style.display = visible ? '' : 'none';
+  });
+}
+
+tabs.forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tabs.forEach(t=>t.classList.toggle('active', t===tab));
+    currentTab = tab.dataset.tab;
+    applyFilters();
+  });
+});
+
+chips.forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    chips.forEach(c=>c.classList.toggle('active', c===chip));
+    currentFilter = chip.dataset.filter;
+    applyFilters();
+  });
+});
+</script>
+</body>
+</html>

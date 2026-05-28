@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Install | OpFix Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/portal.css">
+<style>
+/* ── INSTALL HEADER ── */
+.install-header{
+  background:linear-gradient(180deg,var(--surface) 0%,var(--dark) 100%);
+  border:1px solid var(--hairline);
+  border-radius:20px;
+  padding:24px;
+  position:relative;overflow:hidden;
+}
+.install-header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at top right,rgba(59,130,246,.08) 0%,transparent 55%);
+  pointer-events:none;
+}
+.install-header-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  position:relative;margin-bottom:18px;
+}
+.install-header-left{flex:1}
+.install-header-eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--brand-blue);margin-bottom:6px;
+}
+.install-header-title{
+  font-family:var(--font-display);
+  font-size:22px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.3px;line-height:1.15;
+}
+.install-header-day{text-align:right;flex-shrink:0}
+.install-header-day-num{
+  font-family:var(--font-mono);
+  font-size:32px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-1px;line-height:1;
+}
+.install-header-day-of{
+  font-family:var(--font-mono);
+  font-size:12px;color:var(--muted);margin-top:2px;
+}
+.install-progress{
+  height:8px;border-radius:4px;
+  background:rgba(255,255,255,.06);
+  position:relative;overflow:hidden;
+}
+.install-progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--brand-blue) 0%,#60A5FA 100%);
+  border-radius:4px;position:relative;
+}
+.install-progress-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:24px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));
+}
+
+/* ── PHASE TIMELINE ── */
+.timeline{
+  position:relative;
+  margin-top:24px;
+  padding-left:0;
+}
+.timeline::before{
+  content:'';position:absolute;
+  left:23px;top:18px;bottom:18px;
+  width:2px;
+  background:linear-gradient(180deg,var(--good) 0%,var(--good) 33%,var(--brand-blue) 33%,var(--brand-blue) 66%,var(--hairline-2) 66%,var(--hairline-2) 100%);
+  border-radius:1px;
+}
+
+.phase{
+  position:relative;
+  margin-bottom:14px;
+  padding-left:60px;
+}
+.phase:last-child{margin-bottom:0}
+
+.phase-marker{
+  position:absolute;left:8px;top:18px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--black);
+  border:2px solid var(--hairline-2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);
+  font-size:12px;font-weight:700;color:var(--muted);
+  z-index:2;
+}
+.phase.complete .phase-marker{
+  background:var(--good);border-color:var(--good);color:#fff;
+}
+.phase.complete .phase-marker svg{width:16px;height:16px;stroke-width:3}
+.phase.active .phase-marker{
+  background:var(--brand-blue);border-color:var(--brand-blue);color:#fff;
+  box-shadow:0 0 0 4px rgba(59,130,246,.18);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 4px rgba(59,130,246,.18)}
+  50%{box-shadow:0 0 0 8px rgba(59,130,246,.10)}
+}
+.phase.locked .phase-marker{
+  background:var(--surface);border-color:var(--hairline-2);color:var(--muted);
+}
+.phase.locked .phase-marker svg{width:14px;height:14px;stroke-width:2}
+
+.phase-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  overflow:hidden;
+  transition:border-color .15s;
+}
+.phase.active .phase-card{border-color:rgba(59,130,246,.30)}
+.phase.complete .phase-card{opacity:.85}
+.phase.locked .phase-card{background:rgba(255,255,255,.015)}
+
+.phase-head{
+  padding:18px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.phase-head-left{flex:1;min-width:0}
+.phase-name{
+  font-family:var(--font-display);
+  font-size:16px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.2px;line-height:1.2;
+}
+.phase.locked .phase-name{color:var(--muted)}
+.phase-meta{
+  font-size:12px;color:var(--muted);margin-top:4px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.phase-meta .sep{opacity:.4}
+.phase-status-pill{
+  flex-shrink:0;
+  font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:4px 8px;border-radius:5px;
+}
+.phase.complete .phase-status-pill{background:rgba(16,185,129,.12);color:var(--good);border:1px solid rgba(16,185,129,.25)}
+.phase.active .phase-status-pill{background:rgba(59,130,246,.12);color:var(--brand-blue);border:1px solid rgba(59,130,246,.25)}
+.phase.locked .phase-status-pill{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--hairline-2)}
+
+.phase-chevron{
+  flex-shrink:0;
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);
+  transition:transform .2s;
+}
+.phase-chevron svg{width:16px;height:16px;stroke-width:2}
+.phase.expanded .phase-chevron{transform:rotate(180deg)}
+
+.phase-body{
+  display:none;
+  border-top:1px solid var(--hairline);
+  padding:20px;
+}
+.phase.expanded .phase-body{display:block}
+
+.phase-body-section{margin-bottom:18px}
+.phase-body-section:last-child{margin-bottom:0}
+.phase-body-label{
+  font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+}
+.phase-body-list{
+  display:flex;flex-direction:column;gap:8px;
+}
+.phase-body-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:var(--text);
+  line-height:1.45;
+}
+.phase-body-item-icon{
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+  background:rgba(255,255,255,.04);
+}
+.phase-body-item.done .phase-body-item-icon{background:rgba(16,185,129,.15);color:var(--good)}
+.phase-body-item.done .phase-body-item-icon svg{width:11px;height:11px;stroke-width:3}
+.phase-body-item.active .phase-body-item-icon{background:rgba(59,130,246,.15);color:var(--brand-blue)}
+.phase-body-item.active .phase-body-item-icon::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.phase-body-item.pending .phase-body-item-icon{background:rgba(255,255,255,.04);color:var(--muted)}
+.phase-body-item.pending .phase-body-item-icon::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor}
+.phase-body-item.done .phase-body-item-text{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--hairline-2)}
+
+.phase-gate{
+  margin-top:18px;padding:14px;
+  background:rgba(245,158,11,.06);
+  border:1px solid rgba(245,158,11,.20);
+  border-radius:10px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.phase-gate-icon{
+  flex-shrink:0;color:var(--warn);
+  width:18px;height:18px;
+  margin-top:1px;
+}
+.phase-gate-icon svg{width:18px;height:18px;stroke-width:2}
+.phase-gate-text{flex:1}
+.phase-gate-label{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--warn);margin-bottom:3px;
+}
+.phase-gate-detail{font-size:12px;color:var(--text);line-height:1.4}
+
+.phase-locked-msg{
+  padding:14px;
+  background:rgba(255,255,255,.02);
+  border:1px dashed var(--hairline-2);
+  border-radius:10px;
+  font-size:13px;color:var(--muted);
+  display:flex;align-items:center;gap:10px;
+}
+.phase-locked-msg svg{width:16px;height:16px;stroke-width:2;flex-shrink:0;color:var(--muted)}
+
+/* ── CALENDAR SECTION ── */
+.calendar-card{
+  margin-top:32px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:20px;
+  overflow:hidden;
+}
+.calendar-head{
+  padding:20px 24px;
+  border-bottom:1px solid var(--hairline);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.calendar-head-left{display:flex;align-items:center;gap:12px}
+.calendar-head-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(59,130,246,.10);
+  border:1px solid rgba(59,130,246,.25);
+  color:var(--brand-blue);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.calendar-head-icon svg{width:18px;height:18px;stroke-width:2}
+.calendar-head-title{
+  font-family:var(--font-display);
+  font-size:18px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.2px;
+}
+.calendar-head-sub{
+  font-size:12px;color:var(--muted);margin-top:2px;
+}
+
+.calendar-embed{
+  width:100%;
+  aspect-ratio:4/3;
+  min-height:480px;
+  background:#0F0F0F;
+  border:none;
+  display:block;
+}
+.calendar-placeholder{
+  width:100%;
+  min-height:480px;
+  background:linear-gradient(180deg,rgba(59,130,246,.02) 0%,transparent 50%);
+  display:flex;align-items:center;justify-content:center;
+  padding:40px 24px;
+  text-align:center;
+  flex-direction:column;
+  gap:12px;
+}
+.calendar-placeholder-icon{
+  width:56px;height:56px;border-radius:14px;
+  background:rgba(59,130,246,.08);
+  border:1px solid rgba(59,130,246,.20);
+  color:var(--brand-blue);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:8px;
+}
+.calendar-placeholder-icon svg{width:28px;height:28px;stroke-width:1.6}
+.calendar-placeholder-title{
+  font-family:var(--font-display);
+  font-size:16px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.2px;
+}
+.calendar-placeholder-text{
+  font-size:13px;color:var(--muted);
+  max-width:340px;line-height:1.5;
+}
+.calendar-placeholder-note{
+  margin-top:8px;
+  font-family:var(--font-mono);
+  font-size:11px;color:var(--muted);
+  letter-spacing:.3px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--hairline);
+  padding:6px 12px;border-radius:6px;
+}
+
+/* ── DESKTOP ── */
+@media (min-width:768px){
+  .install-header{padding:32px}
+  .phase{padding-left:64px}
+  .timeline::before{left:25px}
+  .phase-marker{left:9px}
+}
+</style>
+</head>
+<body>
+
+<div id="portal-nav" data-active="install"></div>
+
+<main class="page">
+
+  <div class="greeting fade d1">
+    <div class="greeting-eyebrow">The Install</div>
+    <h1 class="greeting-h1">Your 180-Day Map</h1>
+    <p class="greeting-sub">Four phases · Three stress tests · Zero re-entry</p>
+  </div>
+
+  <!-- Header card -->
+  <section class="install-header fade d2">
+    <div class="install-header-top">
+      <div class="install-header-left">
+        <div class="install-header-eyebrow">Current Phase</div>
+        <div class="install-header-title">Phase 3 · Build</div>
+      </div>
+      <div class="install-header-day">
+        <div class="install-header-day-num">Day 67</div>
+        <div class="install-header-day-of">of 180</div>
+      </div>
+    </div>
+    <div class="install-progress">
+      <div class="install-progress-fill" style="width:37%"></div>
+    </div>
+  </section>
+
+  <!-- Phase timeline -->
+  <div class="section-head fade d3">
+    <h2 class="section-title">Phase Timeline</h2>
+  </div>
+
+  <div class="timeline">
+
+    <!-- Phase 1 COMPLETE -->
+    <div class="phase complete fade d3" data-phase="1">
+      <div class="phase-marker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg>
+      </div>
+      <div class="phase-card">
+        <div class="phase-head" onclick="togglePhase(1)">
+          <div class="phase-head-left">
+            <div class="phase-name">Phase 1 · Diagnose</div>
+            <div class="phase-meta">
+              <span>Days 1–21</span>
+              <span class="sep">·</span>
+              <span>Completed Day 21</span>
+            </div>
+          </div>
+          <span class="phase-status-pill">Complete</span>
+          <div class="phase-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+        <div class="phase-body">
+          <div class="phase-body-section">
+            <div class="phase-body-label">What we did</div>
+            <div class="phase-body-list">
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Deep audit across all 40 factors</div></div>
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Quick Win deployed: Cash flow visibility (Pillar 3)</div></div>
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Diagnosis Report delivered + walkthrough</div></div>
+            </div>
+          </div>
+          <div class="phase-body-section">
+            <div class="phase-body-label">Gate 1 outcome</div>
+            <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Gate 1 cleared. 25% payment received Day 21.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 COMPLETE -->
+    <div class="phase complete fade d3" data-phase="2">
+      <div class="phase-marker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg>
+      </div>
+      <div class="phase-card">
+        <div class="phase-head" onclick="togglePhase(2)">
+          <div class="phase-head-left">
+            <div class="phase-name">Phase 2 · Design</div>
+            <div class="phase-meta">
+              <span>Days 22–42</span>
+              <span class="sep">·</span>
+              <span>Completed Day 42</span>
+            </div>
+          </div>
+          <span class="phase-status-pill">Complete</span>
+          <div class="phase-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+        <div class="phase-body">
+          <div class="phase-body-section">
+            <div class="phase-body-label">What we did</div>
+            <div class="phase-body-list">
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Full 180-day execution plan drafted</div></div>
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Build priorities sequenced and approved</div></div>
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Score progression to 161 (+19)</div></div>
+            </div>
+          </div>
+          <div class="phase-body-section">
+            <div class="phase-body-label">Gate 2 outcome</div>
+            <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Gate 2 cleared. 50% total payment received Day 42.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 ACTIVE (expanded by default) -->
+    <div class="phase active expanded fade d4" data-phase="3">
+      <div class="phase-marker"><span>3</span></div>
+      <div class="phase-card">
+        <div class="phase-head" onclick="togglePhase(3)">
+          <div class="phase-head-left">
+            <div class="phase-name">Phase 3 · Build</div>
+            <div class="phase-meta">
+              <span>Days 43–105</span>
+              <span class="sep">·</span>
+              <span>Day 67 · 38 days to Gate 3</span>
+            </div>
+          </div>
+          <span class="phase-status-pill">Active</span>
+          <div class="phase-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+        <div class="phase-body">
+          <div class="phase-body-section">
+            <div class="phase-body-label">In progress</div>
+            <div class="phase-body-list">
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">SOP-01 to SOP-03 built and live</div></div>
+              <div class="phase-body-item done"><div class="phase-body-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg></div><div class="phase-body-item-text">Hiring scorecards drafted for two roles</div></div>
+              <div class="phase-body-item active"><div class="phase-body-item-icon"></div><div class="phase-body-item-text">Revenue Forecast Dashboard build · ETA Day 74</div></div>
+              <div class="phase-body-item active"><div class="phase-body-item-icon"></div><div class="phase-body-item-text">SOP-04: Cash Reporting Cadence · Awaiting sign-off</div></div>
+              <div class="phase-body-item pending"><div class="phase-body-item-icon"></div><div class="phase-body-item-text">SOP-05 to SOP-08 · Queued for Build sprint 2</div></div>
+              <div class="phase-body-item pending"><div class="phase-body-item-icon"></div><div class="phase-body-item-text">Pipeline visibility rebuild · Days 85–100</div></div>
+            </div>
+          </div>
+          <div class="phase-gate">
+            <div class="phase-gate-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+            </div>
+            <div class="phase-gate-text">
+              <div class="phase-gate-label">Gate 3 · Day 105</div>
+              <div class="phase-gate-detail">All systems built, tested, and operational. 25% payment due. Triggers Phase 4 Lock.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 LOCKED -->
+    <div class="phase locked fade d5" data-phase="4">
+      <div class="phase-marker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+      </div>
+      <div class="phase-card">
+        <div class="phase-head" onclick="togglePhase(4)">
+          <div class="phase-head-left">
+            <div class="phase-name">Phase 4 · Lock</div>
+            <div class="phase-meta">
+              <span>Days 106–180</span>
+              <span class="sep">·</span>
+              <span>Unlocks at Gate 3</span>
+            </div>
+          </div>
+          <span class="phase-status-pill">Locked</span>
+          <div class="phase-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6"/></svg></div>
+        </div>
+        <div class="phase-body">
+          <div class="phase-locked-msg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+            <span>Lock phase unlocks when Gate 3 clears on Day 105. Three live stress tests at Days 130, 155, and 173 will pressure-test every system installed.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Calendar embed -->
+  <div class="calendar-card fade d6" id="calendar">
+    <div class="calendar-head">
+      <div class="calendar-head-left">
+        <div class="calendar-head-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+        </div>
+        <div>
+          <div class="calendar-head-title">Full Calendar</div>
+          <div class="calendar-head-sub">All sessions, gate reviews, and stress tests</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Calendar embed placeholder. Greg wires real cal here. -->
+    <div class="calendar-placeholder">
+      <div class="calendar-placeholder-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+      </div>
+      <div class="calendar-placeholder-title">Google Calendar Embed</div>
+      <div class="calendar-placeholder-text">Greg wires the founder's Google Calendar here. Read-only view. OpFix-booked sessions sync from GHL into their Google Cal.</div>
+      <div class="calendar-placeholder-note">&lt;iframe src="https://calendar.google.com/calendar/embed?src=..."&gt;</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="shared/portal-nav.js"></script>
+<script src="shared/portal-demo.js"></script>
+<script>
+function togglePhase(n){
+  const phase = document.querySelector(`[data-phase="${n}"]`);
+  if(phase) phase.classList.toggle('expanded');
+}
+</script>
+</body>
+</html>
