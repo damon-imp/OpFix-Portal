@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Client | OpFix Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/portal.css">
+<link rel="stylesheet" href="shared/admin.css">
+
+<style>
+/* Page-specific layout */
+.mirror-wrap{
+  max-width:1280px;margin:0 auto;padding:0 24px 48px;
+}
+
+/* Client switcher in admin strip */
+.client-switcher{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:#F59E0B;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.client-switcher select{
+  background:transparent;
+  border:none;
+  color:#F59E0B;
+  font-family:inherit;
+  font-weight:700;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  cursor:pointer;
+  padding:2px 4px;
+  border:1px solid rgba(245,158,11,.30);
+  border-radius:4px;
+}
+.client-switcher select option{background:#0A0A0A;color:#F59E0B;text-transform:none;letter-spacing:0;font-weight:600}
+
+/* Client header */
+.client-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  margin:24px 0 20px;
+  flex-wrap:wrap;
+  gap:14px;
+}
+.client-head h1{
+  font-family:var(--font-display);
+  font-size:32px;
+  font-weight:700;
+  color:var(--text-strong);
+  margin:0;
+  letter-spacing:-.5px;
+}
+.client-head .eyebrow{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:var(--brand-blue);
+  font-weight:600;
+  margin-bottom:6px;
+}
+.client-head .sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* Quick admin actions */
+.quick-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Main grid: founder view (left) + admin sidebar (right) */
+.mirror-grid{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:20px;
+  margin-bottom:24px;
+}
+@media (max-width:1024px){
+  .mirror-grid{grid-template-columns:1fr}
+}
+
+/* Score card (mirrors founder hub but editable) */
+.mirror-score-card{
+  background:linear-gradient(180deg,var(--surface) 0%,var(--dark) 100%);
+  border:1px solid var(--hairline);
+  border-radius:20px;
+  padding:28px 24px;
+  margin-bottom:16px;
+}
+.mirror-score-label{
+  font-size:11px;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--muted);font-weight:600;
+}
+.mirror-score-row{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  margin:14px 0;
+}
+.mirror-score-num{
+  font-family:var(--font-display);
+  font-size:64px;
+  font-weight:700;
+  color:var(--text-strong);
+  line-height:1;
+}
+.mirror-score-total{
+  font-family:var(--font-mono);
+  font-size:18px;
+  color:var(--muted);
+}
+.mirror-score-delta{
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--good);
+  font-weight:600;
+  padding:6px 12px;
+  background:rgba(16,185,129,.10);
+  border-radius:6px;
+  margin-left:auto;
+}
+.tier-pill{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:6px;
+  background:rgba(59,130,246,.10);
+  border:1px solid rgba(59,130,246,.20);
+  color:var(--brand-blue);
+  font-family:var(--font-mono);
+  font-size:12px;
+  font-weight:600;
+}
+
+.mirror-pillars{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  padding-top:18px;
+  border-top:1px solid var(--hairline);
+}
+.mirror-pillar{}
+.mirror-pillar-label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:var(--muted);
+  font-weight:600;
+  margin-bottom:6px;
+}
+.mirror-pillar-bar{
+  height:3px;
+  border-radius:2px;
+  background:rgba(255,255,255,.04);
+  margin-bottom:6px;
+  overflow:hidden;
+}
+.mirror-pillar-fill{height:100%;border-radius:2px}
+.mirror-pillar-value{
+  font-family:var(--font-mono);
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+}
+
+/* Phase card */
+.mirror-phase-card{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:16px;
+  padding:20px 22px;
+}
+.mirror-phase-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+.mirror-phase-name{
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:700;
+  color:var(--text-strong);
+  margin:0;
+}
+.mirror-phase-day{
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--text);
+}
+.mirror-phase-day strong{font-size:18px;color:var(--text-strong)}
+.mirror-progress{
+  height:4px;
+  border-radius:2px;
+  background:rgba(255,255,255,.04);
+  overflow:hidden;
+  margin:12px 0 10px;
+}
+.mirror-progress-fill{
+  height:100%;
+  background:var(--brand-blue);
+  border-radius:2px;
+}
+.mirror-markers{
+  display:flex;
+  justify-content:space-between;
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--muted);
+  font-weight:600;
+  margin-bottom:14px;
+}
+.mirror-markers .done{color:var(--good)}
+.mirror-markers .active{color:var(--brand-blue)}
+
+/* Section header */
+.mirror-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:24px 0 12px;
+}
+.mirror-section-title{
+  font-family:var(--font-display);
+  font-size:18px;
+  font-weight:700;
+  color:var(--text-strong);
+  margin:0;
+}
+
+/* Founder action panel (editable mirror) */
+.founder-actions-panel{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:16px;
+  padding:18px 20px;
+}
+.fa-item{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.fa-item:last-child{border-bottom:none}
+.fa-badge{
+  width:32px;height:32px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+.fa-badge.you{background:rgba(59,130,246,.10);color:var(--brand-blue);border:1px solid rgba(59,130,246,.20)}
+.fa-badge.delivered{background:rgba(16,185,129,.10);color:var(--good);border:1px solid rgba(16,185,129,.20)}
+.fa-badge.delivered svg{width:16px;height:16px;stroke-width:2.5}
+.fa-body{flex:1;min-width:0}
+.fa-title{font-size:14px;font-weight:600;color:var(--text-strong);margin-bottom:2px}
+.fa-meta{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fa-meta .sep{color:var(--hairline-2)}
+.fa-overdue{color:var(--severe);font-weight:600}
+
+/* Internal queue panel (admin-only, amber accent) */
+.internal-queue-panel{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-left:3px solid #F59E0B;
+  border-radius:16px;
+  padding:20px;
+  position:sticky;
+  top:80px;
+}
+.iq-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--hairline);
+  margin-bottom:14px;
+}
+.iq-head-left{display:flex;align-items:center;gap:10px}
+.iq-icon{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:rgba(245,158,11,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#F59E0B;
+}
+.iq-icon svg{width:16px;height:16px;stroke-width:2.5}
+.iq-title{
+  font-family:var(--font-display);
+  font-size:15px;
+  font-weight:700;
+  color:var(--text-strong);
+  margin:0;
+  line-height:1.2;
+}
+.iq-subtitle{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:#F59E0B;
+  font-weight:600;
+  margin-top:3px;
+}
+.iq-add-btn{
+  background:rgba(245,158,11,.10);
+  border:1px solid rgba(245,158,11,.20);
+  color:#F59E0B;
+  border-radius:6px;
+  padding:6px 10px;
+  font-size:11px;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.iq-add-btn svg{width:12px;height:12px;stroke-width:2.5}
+.iq-item{
+  padding:10px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.iq-item:last-child{border-bottom:none}
+.iq-item-title{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-strong);
+  margin-bottom:4px;
+  line-height:1.35;
+}
+.iq-item-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  font-size:11px;
+  color:var(--muted);
+}
+.iq-item-meta .sep{color:var(--hairline-2)}
+.iq-eta{
+  font-family:var(--font-mono);
+  font-weight:600;
+  color:#F59E0B;
+}
+.iq-status{
+  padding:2px 6px;
+  border-radius:3px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  font-family:var(--font-mono);
+}
+.iq-status.in_progress{background:rgba(59,130,246,.10);color:var(--brand-blue)}
+.iq-status.queued{background:rgba(245,158,11,.10);color:#F59E0B}
+.iq-status.blocked{background:rgba(200,30,45,.10);color:var(--severe)}
+
+.iq-pillar-tag{
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:600;
+  padding:1px 5px;
+  border-radius:3px;
+}
+.iq-pillar-tag.p1{background:rgba(59,130,246,.10);color:var(--brand-blue)}
+.iq-pillar-tag.p2{background:rgba(16,185,129,.10);color:var(--good)}
+.iq-pillar-tag.p3{background:rgba(245,158,11,.10);color:#F59E0B}
+.iq-pillar-tag.p4{background:rgba(139,92,246,.10);color:#8B5CF6}
+
+/* Tab strip (mock founder nav for this client) */
+.mirror-tabs{
+  display:flex;
+  gap:2px;
+  padding:4px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:10px;
+  margin-bottom:20px;
+  overflow-x:auto;
+}
+.mirror-tab{
+  padding:8px 14px;
+  border-radius:6px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  text-decoration:none;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.mirror-tab svg{width:14px;height:14px;stroke-width:2}
+.mirror-tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.mirror-tab.active{background:rgba(59,130,246,.10);color:var(--brand-blue)}
+.mirror-tab.locked{opacity:.5}
+.mirror-tab .badge{
+  background:#F59E0B;
+  color:#0A0A0A;
+  font-size:9px;
+  font-weight:700;
+  padding:1px 4px;
+  border-radius:3px;
+  margin-left:4px;
+}
+
+/* Fade-in */
+.fade{opacity:0;animation:fadeIn .4s ease forwards}
+.fade.d1{animation-delay:.05s}
+.fade.d2{animation-delay:.10s}
+.fade.d3{animation-delay:.15s}
+.fade.d4{animation-delay:.20s}
+.fade.d5{animation-delay:.25s}
+@keyframes fadeIn{to{opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- Admin strip with client switcher (replaces default admin-nav strip) -->
+<div class="admin-strip">
+  <div class="admin-strip-inner">
+    <div class="admin-strip-left">
+      <span class="admin-strip-badge">ADMIN</span>
+      <span>Viewing as admin · editing enabled</span>
+      <span class="client-switcher">
+        Client:
+        <select id="client-switcher">
+          <option value="acme" selected>Acme Operations</option>
+          <option value="cypress">Cypress Holdings</option>
+          <option value="riverstone">Riverstone Industries</option>
+          <option value="pinnacle">Pinnacle Logistics</option>
+          <option value="beacon">Beacon Systems</option>
+        </select>
+      </span>
+    </div>
+    <div class="admin-strip-right">
+      <a href="index.html" class="admin-strip-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to all clients
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Admin topbar (logo + admin user) -->
+<header class="admin-topbar">
+  <div class="admin-topbar-inner">
+    <a href="index.html" class="brand-mark" aria-label="OpFix Admin">
+      <img src="../shared/opfix-logo.svg" alt="OpFix" class="brand-logo">
+    </a>
+    <nav class="admin-topbar-nav" aria-label="Admin Primary">
+      <a href="index.html" class="admin-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Clients
+      </a>
+      <a href="queue.html" class="admin-nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Build Queue
+      </a>
+    </nav>
+    <div class="admin-user">
+      <div class="admin-user-avatar">DA</div>
+      <div class="admin-user-name">Damon Aleczander</div>
+    </div>
+  </div>
+</header>
+
+<main class="mirror-wrap">
+
+  <header class="client-head fade">
+    <div>
+      <div class="eyebrow">Per-Client Admin View</div>
+      <h1 class="editable" data-field="Company name">Acme Operations</h1>
+      <div class="sub">
+        <span class="editable" data-field="Founder name">John Smith</span>
+        · <span class="editable" data-field="Engagement status">Active</span>
+        · <span class="editable" data-field="Tier">Rebuild</span>
+        · <span class="editable" data-field="Payment status">PIF · paid</span>
+      </div>
+    </div>
+    <div class="quick-actions">
+      <button class="admin-btn" data-admin-action="Re-score (cascade to GHL + history)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Re-score
+      </button>
+      <button class="admin-btn" data-admin-action="Upload deliverable to Vault">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Upload
+      </button>
+      <button class="admin-btn" data-admin-action="Mark current gate complete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+        Mark Gate
+      </button>
+      <button class="admin-btn primary" data-admin-action="Send notification to founder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 16v-5a6 6 0 10-12 0v5l-2 3h16l-2-3z"/><path d="M10 21a2 2 0 004 0"/></svg>
+        Notify
+      </button>
+    </div>
+  </header>
+
+  <!-- Founder-view tab strip (admin sees what founder sees + can switch tabs) -->
+  <div class="mirror-tabs fade d1">
+    <a href="#" class="mirror-tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12L12 4l9 8M5 10v10h14V10"/></svg>
+      Hub
+    </a>
+    <a href="#" class="mirror-tab" data-admin-action="Open Score admin view (v2.3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Score
+      <span class="badge">EDIT</span>
+    </a>
+    <a href="#" class="mirror-tab" data-admin-action="Open Install admin view (v2.3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      Install
+    </a>
+    <a href="#" class="mirror-tab" data-admin-action="Open Actions admin view (v2.3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+      Actions
+    </a>
+    <a href="#" class="mirror-tab" data-admin-action="Open Vault admin view (v2.3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+      Vault
+    </a>
+    <a href="#" class="mirror-tab locked" data-admin-action="Stress Test (unlocks Day 106)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+      Stress Test
+    </a>
+  </div>
+
+  <!-- Main grid: founder mirror (left) + internal queue (right) -->
+  <div class="mirror-grid">
+
+    <!-- LEFT: founder mirror -->
+    <div>
+
+      <!-- Score card -->
+      <div class="mirror-score-card fade d2">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="mirror-score-label">X-RAY SCORE</div>
+          <span class="tier-pill editable" data-field="Tier">Rebuild</span>
+        </div>
+        <div class="mirror-score-row">
+          <span class="mirror-score-num editable" data-field="Current score">168</span>
+          <span class="mirror-score-total">/ 240</span>
+          <span class="mirror-score-delta">↗ +26 since Day 1</span>
+        </div>
+        <div class="mirror-pillars">
+          <div class="mirror-pillar">
+            <div class="mirror-pillar-label">Operations</div>
+            <div class="mirror-pillar-bar"><div class="mirror-pillar-fill" style="width:72%;background:#3B82F6"></div></div>
+            <div class="mirror-pillar-value editable" data-field="Operations score">43 / 60</div>
+          </div>
+          <div class="mirror-pillar">
+            <div class="mirror-pillar-label">Revenue</div>
+            <div class="mirror-pillar-bar"><div class="mirror-pillar-fill" style="width:67%;background:#10B981"></div></div>
+            <div class="mirror-pillar-value editable" data-field="Revenue score">40 / 60</div>
+          </div>
+          <div class="mirror-pillar">
+            <div class="mirror-pillar-label">Financial</div>
+            <div class="mirror-pillar-bar"><div class="mirror-pillar-fill" style="width:62%;background:#F59E0B"></div></div>
+            <div class="mirror-pillar-value editable" data-field="Financial score">37 / 60</div>
+          </div>
+          <div class="mirror-pillar">
+            <div class="mirror-pillar-label">Team</div>
+            <div class="mirror-pillar-bar"><div class="mirror-pillar-fill" style="width:80%;background:#8B5CF6"></div></div>
+            <div class="mirror-pillar-value editable" data-field="Team score">48 / 60</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase card -->
+      <div class="mirror-phase-card fade d2">
+        <div class="mirror-phase-head">
+          <div>
+            <h2 class="mirror-phase-name editable" data-field="Current phase">Phase 3 · Build</h2>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.4px;margin-top:4px;font-weight:600">Days 43–105</div>
+          </div>
+          <div class="mirror-phase-day">
+            Day <strong class="editable" data-field="Current day">67</strong> / 180
+          </div>
+        </div>
+        <div class="mirror-progress"><div class="mirror-progress-fill" style="width:37%"></div></div>
+        <div class="mirror-markers">
+          <span class="done">G1 · D21 ✓</span>
+          <span class="done">G2 · D42 ✓</span>
+          <span class="active">G3 · D105</span>
+          <span>G4 · D180</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--hairline);margin-top:6px;font-size:13px;color:var(--text)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px;height:16px;color:var(--brand-blue)"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+          <strong style="color:var(--brand-blue)">38 days</strong> to Gate 3 · End of Build
+        </div>
+      </div>
+
+      <!-- Founder Actions (editable) -->
+      <div class="mirror-section-head fade d3">
+        <h2 class="mirror-section-title">Founder Actions (visible to client)</h2>
+        <button class="admin-btn" style="font-size:12px;padding:6px 12px" data-admin-action="Add new founder action">+ Add Action</button>
+      </div>
+      <div class="founder-actions-panel fade d3">
+
+        <div class="fa-item">
+          <div class="fa-badge you">YOU</div>
+          <div class="fa-body">
+            <div class="fa-title editable" data-field="Action title">Sign off on SOP-04: Cash Reporting Cadence</div>
+            <div class="fa-meta">
+              <span>Pillar 3 · Financial</span>
+              <span class="sep">·</span>
+              <span class="fa-overdue">Overdue by 2 days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fa-item">
+          <div class="fa-badge you">YOU</div>
+          <div class="fa-body">
+            <div class="fa-title editable" data-field="Action title">Approve hiring scorecard for Ops Manager role</div>
+            <div class="fa-meta">
+              <span>Pillar 4 · Team</span>
+              <span class="sep">·</span>
+              <span>Due in 3 days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fa-item">
+          <div class="fa-badge you">YOU</div>
+          <div class="fa-body">
+            <div class="fa-title editable" data-field="Action title">Upload last 6 months revenue data (CSV)</div>
+            <div class="fa-meta">
+              <span>Pillar 2 · Revenue</span>
+              <span class="sep">·</span>
+              <span>Due in 5 days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fa-item">
+          <div class="fa-badge delivered">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/></svg>
+          </div>
+          <div class="fa-body">
+            <div class="fa-title">SOP-03 · Daily Standup Cadence delivered to Vault</div>
+            <div class="fa-meta">
+              <span>Pillar 1 · Operations</span>
+              <span class="sep">·</span>
+              <span>Day 62</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: internal build queue (admin-only, NEVER visible to founder) -->
+    <div>
+      <div class="internal-queue-panel fade d2">
+        <div class="iq-head">
+          <div class="iq-head-left">
+            <div class="iq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 8v8M8 12h8"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <div>
+              <div class="iq-subtitle">Internal · Admin Only</div>
+              <h3 class="iq-title">OpFix Build Queue</h3>
+            </div>
+          </div>
+          <button class="iq-add-btn" data-admin-action="Add queue item for this client">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+            Add
+          </button>
+        </div>
+
+        <div class="iq-item">
+          <div class="iq-item-title editable" data-field="Queue item title">Revenue Forecast Dashboard build</div>
+          <div class="iq-item-meta">
+            <span class="iq-pillar-tag p2">P2</span>
+            <span class="iq-eta">ETA Day 74</span>
+            <span class="sep">·</span>
+            <span>7 days</span>
+            <span class="iq-status in_progress">In Progress</span>
+          </div>
+        </div>
+
+        <div class="iq-item">
+          <div class="iq-item-title editable" data-field="Queue item title">SOP-05: Operational Reporting Cadence</div>
+          <div class="iq-item-meta">
+            <span class="iq-pillar-tag p1">P1</span>
+            <span class="iq-eta">ETA Day 82</span>
+            <span class="sep">·</span>
+            <span>15 days</span>
+            <span class="iq-status in_progress">In Progress</span>
+          </div>
+        </div>
+
+        <div class="iq-item">
+          <div class="iq-item-title editable" data-field="Queue item title">SOP-06: Margin Reporting</div>
+          <div class="iq-item-meta">
+            <span class="iq-pillar-tag p3">P3</span>
+            <span class="iq-eta">ETA Day 89</span>
+            <span class="sep">·</span>
+            <span>22 days</span>
+            <span class="iq-status queued">Queued</span>
+          </div>
+        </div>
+
+        <div class="iq-item">
+          <div class="iq-item-title editable" data-field="Queue item title">Ops Manager job posting + outbound sourcing</div>
+          <div class="iq-item-meta">
+            <span class="iq-pillar-tag p4">P4</span>
+            <span class="iq-eta">ETA Day 78</span>
+            <span class="sep">·</span>
+            <span>11 days</span>
+            <span class="iq-status in_progress">In Progress</span>
+          </div>
+        </div>
+
+        <div class="iq-item">
+          <div class="iq-item-title editable" data-field="Queue item title">Pipeline visibility rebuild</div>
+          <div class="iq-item-meta">
+            <span class="iq-pillar-tag p2">P2</span>
+            <span class="iq-eta">ETA Day 95</span>
+            <span class="sep">·</span>
+            <span>28 days</span>
+            <span class="iq-status queued">Queued</span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);font-size:11px;color:var(--muted);line-height:1.5">
+          <strong style="color:#F59E0B">Doctrine:</strong> Queue items NEVER appear in founder view. They surface here and on <a href="queue.html" style="color:#F59E0B">/admin/queue</a> only. Founders see proof of work (Recently Delivered) — not forward queue.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="shared/admin-demo.js"></script>
+
+<script>
+// Client switcher (wires to URL param in production, demo reloads to selected)
+const switcher = document.getElementById('client-switcher');
+const urlParams = new URLSearchParams(window.location.search);
+const currentId = urlParams.get('id') || 'acme';
+if(switcher){
+  switcher.value = currentId;
+  switcher.addEventListener('change', (e)=>{
+    window.showAdminToast(`Switching to ${e.target.options[e.target.selectedIndex].text}…`);
+    // Real impl: window.location.href = `client.html?id=${e.target.value}`;
+  });
+}
+
+document.body.style.opacity = '1';
+</script>
+
+</body>
+</html>

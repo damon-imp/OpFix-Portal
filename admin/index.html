@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Clients | OpFix Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/portal.css">
+<link rel="stylesheet" href="shared/admin.css">
+</head>
+<body>
+<div id="admin-nav" data-active="clients"></div>
+
+<main class="container" style="max-width:1280px;margin:0 auto;padding:0 24px 48px">
+
+  <header class="admin-page-head fade">
+    <div>
+      <div class="admin-page-eyebrow">Admin Console</div>
+      <h1 class="admin-page-title">All Active Clients</h1>
+    </div>
+    <div class="admin-page-actions">
+      <button class="admin-btn" data-admin-action="Export client report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export
+      </button>
+      <button class="admin-btn primary" data-admin-action="Add new client engagement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+        New Engagement
+      </button>
+    </div>
+  </header>
+
+  <!-- Stat cards -->
+  <div class="admin-stats fade d1">
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Active Engagements</div>
+      <div class="admin-stat-value">5</div>
+      <div class="admin-stat-sub">of 40 capacity</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Founder Actions</div>
+      <div class="admin-stat-value">11</div>
+      <div class="admin-stat-sub" style="color:var(--severe)">3 overdue</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">OpFix Build Queue</div>
+      <div class="admin-stat-value">22</div>
+      <div class="admin-stat-sub" style="color:#F59E0B">1 blocked</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Avg Score Δ</div>
+      <div class="admin-stat-value">+30</div>
+      <div class="admin-stat-sub">from baseline</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Gates This Week</div>
+      <div class="admin-stat-value">2</div>
+      <div class="admin-stat-sub">Pinnacle · Beacon</div>
+    </div>
+  </div>
+
+  <!-- Clients table -->
+  <div class="clients-table-wrap fade d2">
+    <div class="clients-toolbar">
+      <h2 class="section-title-admin">Active Engagements</h2>
+      <input type="search" class="clients-search" placeholder="Search clients…">
+    </div>
+
+    <div class="client-row header">
+      <div>Company · Founder</div>
+      <div>Phase</div>
+      <div>Day · Next Gate</div>
+      <div>Score · Δ</div>
+      <div>Actions · Queue</div>
+      <div>Last Login</div>
+      <div>Status</div>
+    </div>
+
+    <a href="client.html?id=acme" class="client-row fade d3">
+      <div>
+        <div class="client-name">Acme Operations</div>
+        <div class="client-sub">John Smith</div>
+      </div>
+      <div><span class="phase-pill p3">P3 · Build</span></div>
+      <div>
+        <div class="day-cell">D67 / 180</div>
+        <div class="client-sub">38d to G3</div>
+      </div>
+      <div class="score-cell">
+        <span class="score-value">168</span>
+        <span class="score-delta">+26</span>
+      </div>
+      <div class="actions-cell">
+        <span class="has-overdue">3</span> open <span class="sep">·</span> <span class="opfix-queue">5</span> queue
+      </div>
+      <div class="last-login">2h ago</div>
+      <div><span class="client-status active">Active</span></div>
+    </a>
+
+    <a href="client.html?id=cypress" class="client-row fade d3">
+      <div>
+        <div class="client-name">Cypress Holdings</div>
+        <div class="client-sub">Marisol Reyes</div>
+      </div>
+      <div><span class="phase-pill p1">P1 · Diagnose</span></div>
+      <div>
+        <div class="day-cell">D14 / 180</div>
+        <div class="client-sub">7d to G1</div>
+      </div>
+      <div class="score-cell">
+        <span class="score-value">142</span>
+        <span class="score-delta zero">baseline</span>
+      </div>
+      <div class="actions-cell">
+        2 open <span class="sep">·</span> <span class="opfix-queue">6</span> queue
+      </div>
+      <div class="last-login">1d ago</div>
+      <div><span class="client-status active">Active</span></div>
+    </a>
+
+    <a href="client.html?id=riverstone" class="client-row fade d4">
+      <div>
+        <div class="client-name">Riverstone Industries</div>
+        <div class="client-sub">Daniel Park</div>
+      </div>
+      <div><span class="phase-pill p4">P4 · Lock</span></div>
+      <div>
+        <div class="day-cell">D142 / 180</div>
+        <div class="client-sub">Stress Test 2 · 13d</div>
+      </div>
+      <div class="score-cell">
+        <span class="score-value">198</span>
+        <span class="score-delta">+43</span>
+      </div>
+      <div class="actions-cell">
+        1 open <span class="sep">·</span> <span class="opfix-queue">3</span> queue
+      </div>
+      <div class="last-login">4h ago</div>
+      <div><span class="client-status active">Active</span></div>
+    </a>
+
+    <a href="client.html?id=pinnacle" class="client-row fade d4">
+      <div>
+        <div class="client-name">Pinnacle Logistics</div>
+        <div class="client-sub">Anya Chen</div>
+      </div>
+      <div><span class="phase-pill p3">P3 · Build</span></div>
+      <div>
+        <div class="day-cell">D95 / 180</div>
+        <div class="client-sub">10d to G3</div>
+      </div>
+      <div class="score-cell">
+        <span class="score-value">175</span>
+        <span class="score-delta">+27</span>
+      </div>
+      <div class="actions-cell">
+        <span class="has-overdue">4</span> open · 2 over <span class="sep">·</span> <span class="opfix-queue">8</span> queue
+      </div>
+      <div class="last-login">5d ago</div>
+      <div><span class="client-status warning">Warning</span></div>
+    </a>
+
+    <a href="client.html?id=beacon" class="client-row fade d5">
+      <div>
+        <div class="client-name">Beacon Systems</div>
+        <div class="client-sub">Marcus Webb</div>
+      </div>
+      <div><span class="phase-pill p4">P4 · Lock</span></div>
+      <div>
+        <div class="day-cell">D178 / 180</div>
+        <div class="client-sub">Final · 2d</div>
+      </div>
+      <div class="score-cell">
+        <span class="score-value">215</span>
+        <span class="score-delta">+53</span>
+      </div>
+      <div class="actions-cell">
+        1 open <span class="sep">·</span> <span class="opfix-queue">0</span> queue
+      </div>
+      <div class="last-login">6h ago</div>
+      <div><span class="client-status active">Active</span></div>
+    </a>
+
+  </div>
+
+  <!-- Cross-client analytics teaser -->
+  <div style="margin-top:32px" class="fade d6">
+    <h2 class="section-title-admin" style="margin-bottom:14px">Cross-Client Patterns</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+
+      <div class="admin-stat-card">
+        <div class="admin-stat-label" style="color:var(--brand-blue)">Common Severity</div>
+        <div style="font-size:14px;color:var(--text);margin-top:6px;font-weight:600">Cash visibility (Pillar 3)</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">4 of 5 clients scored 3 or below at baseline</div>
+      </div>
+
+      <div class="admin-stat-card">
+        <div class="admin-stat-label" style="color:var(--good)">Highest-leverage Pillar</div>
+        <div style="font-size:14px;color:var(--text);margin-top:6px;font-weight:600">Team & Leadership</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Avg gain +12pts across all 5 engagements</div>
+      </div>
+
+      <div class="admin-stat-card">
+        <div class="admin-stat-label" style="color:#F59E0B">Slowest-moving Pillar</div>
+        <div style="font-size:14px;color:var(--text);margin-top:6px;font-weight:600">Financial Structure</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Avg gain +6pts · re-examine SOP delivery cadence</div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script src="shared/admin-nav.js"></script>
+<script src="shared/admin-demo.js"></script>
+
+<script>
+// Simple client search filter
+const searchInput = document.querySelector('.clients-search');
+const clientRows = document.querySelectorAll('.client-row:not(.header)');
+
+searchInput?.addEventListener('input', (e)=>{
+  const q = e.target.value.toLowerCase();
+  clientRows.forEach(row=>{
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+// Add fade-in animation classes
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.body.style.opacity = '1';
+});
+</script>
+
+<style>
+.fade{opacity:0;animation:fadeIn .4s ease forwards}
+.fade.d1{animation-delay:.05s}
+.fade.d2{animation-delay:.10s}
+.fade.d3{animation-delay:.15s}
+.fade.d4{animation-delay:.20s}
+.fade.d5{animation-delay:.25s}
+.fade.d6{animation-delay:.30s}
+@keyframes fadeIn{to{opacity:1}}
+</style>
+</body>
+</html>

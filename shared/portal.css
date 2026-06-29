@@ -255,3 +255,25 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .fade.d6{animation-delay:.44s}
 
 @media (prefers-reduced-motion:reduce){.fade{animation:none;opacity:1}}
+
+/* ── ADMIN ENTRY (in founder topbar, visible to admin users only) ── */
+.admin-entry{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:'JetBrains Mono', monospace;
+  background:rgba(245,158,11,.10);
+  color:#F59E0B;
+  border:1px solid rgba(245,158,11,.20);
+  text-decoration:none;
+  margin-right:4px;
+  transition:background .15s;
+}
+.admin-entry:hover{background:rgba(245,158,11,.18)}
+@media (max-width:768px){.admin-entry{display:none}}

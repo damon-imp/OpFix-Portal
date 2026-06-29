@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Build Queue | OpFix Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/portal.css">
+<link rel="stylesheet" href="shared/admin.css">
+
+<style>
+.queue-page-wrap{
+  max-width:1280px;margin:0 auto;padding:0 24px 48px;
+}
+
+.queue-tabs{
+  display:flex;
+  gap:2px;
+  padding:4px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:10px;
+  margin-bottom:20px;
+  width:fit-content;
+}
+.queue-tab{
+  padding:8px 14px;
+  border-radius:6px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.queue-tab:hover{color:var(--text)}
+.queue-tab.active{background:rgba(245,158,11,.10);color:#F59E0B}
+.queue-tab .count{
+  display:inline-block;
+  margin-left:6px;
+  background:rgba(255,255,255,.06);
+  color:var(--muted);
+  padding:1px 7px;
+  border-radius:10px;
+  font-size:11px;
+  font-family:var(--font-mono);
+}
+.queue-tab.active .count{background:rgba(245,158,11,.20);color:#F59E0B}
+
+.queue-filters{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.queue-chip{
+  padding:6px 12px;
+  border-radius:6px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  font-size:12px;
+  color:var(--muted);
+  cursor:pointer;
+  font-family:inherit;
+}
+.queue-chip:hover{color:var(--text);border-color:var(--hairline-2)}
+.queue-chip.active{
+  background:rgba(245,158,11,.10);
+  border-color:rgba(245,158,11,.30);
+  color:#F59E0B;
+}
+
+.queue-table-wrap{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-left:3px solid #F59E0B;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.queue-row{
+  display:grid;
+  grid-template-columns:1.2fr 2.5fr 0.6fr 0.9fr 0.9fr 0.7fr 0.9fr;
+  gap:14px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--hairline);
+  align-items:center;
+  font-size:13px;
+}
+.queue-row:last-child{border-bottom:none}
+.queue-row:hover{background:rgba(255,255,255,.02)}
+.queue-row.header{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:var(--muted);
+  font-weight:600;
+  background:rgba(255,255,255,.015);
+  padding:12px 20px;
+}
+.queue-row.header:hover{background:rgba(255,255,255,.015)}
+
+.q-client{font-weight:600;color:var(--text-strong)}
+.q-client-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.q-title-cell{font-weight:600;color:var(--text-strong);line-height:1.35}
+.q-pillar{
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:4px;
+  font-size:10px;
+  font-weight:600;
+  font-family:var(--font-mono);
+}
+.q-pillar.p1{background:rgba(59,130,246,.10);color:#3B82F6}
+.q-pillar.p2{background:rgba(16,185,129,.10);color:#10B981}
+.q-pillar.p3{background:rgba(245,158,11,.10);color:#F59E0B}
+.q-pillar.p4{background:rgba(139,92,246,.10);color:#8B5CF6}
+.q-pillar.none{background:rgba(255,255,255,.04);color:var(--muted)}
+.q-eta-cell{font-family:var(--font-mono);font-weight:600;color:#F59E0B}
+.q-days{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.q-type{
+  font-family:var(--font-mono);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:var(--muted);
+}
+.q-sprint{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text);
+  font-weight:600;
+}
+
+.q-actions{
+  display:flex;
+  gap:6px;
+}
+.q-action-btn{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  padding:4px;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.q-action-btn:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.q-action-btn svg{width:14px;height:14px;stroke-width:2}
+
+@media (max-width:1024px){
+  .queue-row{
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+  .queue-row.header{display:none}
+}
+
+.fade{opacity:0;animation:fadeIn .4s ease forwards}
+.fade.d1{animation-delay:.05s}
+.fade.d2{animation-delay:.10s}
+.fade.d3{animation-delay:.15s}
+@keyframes fadeIn{to{opacity:1}}
+</style>
+</head>
+<body>
+<div id="admin-nav" data-active="queue"></div>
+
+<main class="queue-page-wrap">
+
+  <header class="admin-page-head fade">
+    <div>
+      <div class="admin-page-eyebrow">Admin Console</div>
+      <h1 class="admin-page-title">OpFix Build Queue</h1>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px;max-width:680px">
+        Internal work-in-progress and queued items across all active clients. <strong style="color:#F59E0B">Never surfaced to founders.</strong> Use this to plan delivery sprints and balance workload.
+      </div>
+    </div>
+    <div class="admin-page-actions">
+      <button class="admin-btn" data-admin-action="Export queue to CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export
+      </button>
+      <button class="admin-btn primary" data-admin-action="Add new queue item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+        Add Item
+      </button>
+    </div>
+  </header>
+
+  <!-- Stat strip -->
+  <div class="admin-stats fade d1" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Total Queue</div>
+      <div class="admin-stat-value">22</div>
+      <div class="admin-stat-sub">across 4 clients</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label" style="color:var(--brand-blue)">In Progress</div>
+      <div class="admin-stat-value" style="color:var(--brand-blue)">9</div>
+      <div class="admin-stat-sub">active sprints</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label" style="color:#F59E0B">Queued</div>
+      <div class="admin-stat-value" style="color:#F59E0B">12</div>
+      <div class="admin-stat-sub">awaiting sprint slot</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label" style="color:var(--severe)">Blocked</div>
+      <div class="admin-stat-value" style="color:var(--severe)">1</div>
+      <div class="admin-stat-sub">Pinnacle · SOP-04</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-label">Due This Week</div>
+      <div class="admin-stat-value">4</div>
+      <div class="admin-stat-sub">across all clients</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="queue-tabs fade d2">
+    <button class="queue-tab active" data-status="all">All <span class="count">22</span></button>
+    <button class="queue-tab" data-status="in_progress">In Progress <span class="count">9</span></button>
+    <button class="queue-tab" data-status="queued">Queued <span class="count">12</span></button>
+    <button class="queue-tab" data-status="blocked">Blocked <span class="count">1</span></button>
+  </div>
+
+  <!-- Client filters -->
+  <div class="queue-filters fade d2">
+    <button class="queue-chip active" data-client="all">All clients</button>
+    <button class="queue-chip" data-client="acme">Acme Operations</button>
+    <button class="queue-chip" data-client="cypress">Cypress Holdings</button>
+    <button class="queue-chip" data-client="riverstone">Riverstone Industries</button>
+    <button class="queue-chip" data-client="pinnacle">Pinnacle Logistics</button>
+    <button class="queue-chip" data-client="beacon">Beacon Systems</button>
+  </div>
+
+  <!-- Queue table -->
+  <div class="queue-table-wrap fade d3" id="queue-table">
+    <!-- Populated by JS from window.ADMIN_QUEUE -->
+  </div>
+
+</main>
+
+<script src="shared/admin-nav.js"></script>
+<script src="shared/admin-demo.js"></script>
+
+<script>
+// Render queue table from sample data
+const table = document.getElementById('queue-table');
+
+function pillarTag(p){
+  if(!p) return '<span class="q-pillar none">—</span>';
+  return `<span class="q-pillar ${p}">${p.toUpperCase()}</span>`;
+}
+
+function render(items){
+  const headerRow = `
+    <div class="queue-row header">
+      <div>Client</div>
+      <div>Title</div>
+      <div>Pillar</div>
+      <div>ETA Day</div>
+      <div>Type · Sprint</div>
+      <div>Status</div>
+      <div></div>
+    </div>
+  `;
+  const rows = items.map(item=>`
+    <div class="queue-row" data-status="${item.status}" data-client="${item.client_id}">
+      <div>
+        <div class="q-client">${item.client}</div>
+      </div>
+      <div class="q-title-cell editable" data-field="Queue item title">${item.title}</div>
+      <div>${pillarTag(item.pillar)}</div>
+      <div>
+        <div class="q-eta-cell">Day ${item.eta_day}</div>
+        <div class="q-days">${item.days_to}d</div>
+      </div>
+      <div>
+        <span class="q-type">${item.type}</span><br>
+        <span class="q-sprint">Sprint ${item.sprint}</span>
+      </div>
+      <div><span class="iq-status ${item.status}">${item.status.replace('_',' ')}</span></div>
+      <div class="q-actions">
+        <button class="q-action-btn" data-admin-action="Mark as delivered (moves to client Vault)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+        </button>
+        <button class="q-action-btn" data-admin-action="Edit queue item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="q-action-btn" data-admin-action="Delete queue item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  table.innerHTML = headerRow + rows;
+}
+
+// Initial render with sample data (from admin-demo.js)
+setTimeout(()=>{
+  render(window.ADMIN_QUEUE || []);
+}, 0);
+
+// Tab + filter logic
+let activeStatus = 'all';
+let activeClient = 'all';
+
+function applyFilters(){
+  const items = (window.ADMIN_QUEUE || []).filter(item=>{
+    if(activeStatus !== 'all' && item.status !== activeStatus) return false;
+    if(activeClient !== 'all' && item.client_id !== activeClient) return false;
+    return true;
+  });
+  render(items);
+}
+
+document.querySelectorAll('.queue-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.queue-tab').forEach(t=>t.classList.toggle('active', t===tab));
+    activeStatus = tab.dataset.status;
+    applyFilters();
+  });
+});
+
+document.querySelectorAll('.queue-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.queue-chip').forEach(c=>c.classList.toggle('active', c===chip));
+    activeClient = chip.dataset.client;
+    applyFilters();
+  });
+});
+</script>
+
+</body>
+</html>
