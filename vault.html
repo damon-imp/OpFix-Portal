@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Vault | OpFix Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/portal.css">
+<style>
+/* ── VAULT HEADER STATS ── */
+.vault-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-bottom:20px;
+}
+.vault-stat{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  padding:14px;
+}
+.vault-stat-label{
+  font-size:10px;font-weight:600;
+  letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.vault-stat-value{
+  font-family:var(--font-mono);
+  font-size:24px;font-weight:700;
+  color:var(--text-strong);
+  letter-spacing:-1px;line-height:1;
+}
+.vault-stat-sub{
+  font-size:11px;color:var(--muted);margin-top:4px;
+}
+
+/* ── SEARCH + FILTERS ── */
+.vault-search{
+  position:relative;margin-bottom:14px;
+}
+.vault-search input{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:12px;
+  padding:12px 14px 12px 42px;
+  font-family:var(--font-body);
+  font-size:14px;
+  color:var(--text);
+  transition:border-color .15s;
+}
+.vault-search input:focus{
+  outline:none;border-color:rgba(59,130,246,.40);
+}
+.vault-search input::placeholder{color:var(--muted)}
+.vault-search-icon{
+  position:absolute;left:14px;top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;
+}
+.vault-search-icon svg{width:18px;height:18px;stroke-width:2}
+
+.filter-row{
+  display:flex;gap:8px;
+  margin-bottom:18px;flex-wrap:wrap;
+}
+.filter-chip{
+  padding:7px 13px;border-radius:100px;
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  font-size:12px;font-weight:600;
+  color:var(--muted);
+  transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.filter-chip .count{
+  font-family:var(--font-mono);
+  font-size:10px;font-weight:700;
+  background:rgba(255,255,255,.06);
+  padding:2px 6px;border-radius:100px;
+  letter-spacing:.3px;
+}
+.filter-chip.active{
+  background:rgba(59,130,246,.10);
+  border-color:rgba(59,130,246,.30);
+  color:var(--brand-blue);
+}
+.filter-chip.active .count{background:rgba(59,130,246,.20);color:var(--brand-blue)}
+.filter-chip:not(.active):hover{color:var(--text)}
+
+/* ── DELIVERABLE LIST ── */
+.vault-list{display:flex;flex-direction:column;gap:0}
+.vault-group{margin-bottom:24px}
+.vault-group:last-child{margin-bottom:0}
+.vault-group-label{
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+  padding:0 4px;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:8px;
+}
+.vault-group-label::after{
+  content:'';flex:1;height:1px;background:var(--hairline);
+}
+
+.deliverable{
+  background:var(--surface);
+  border:1px solid var(--hairline);
+  border-radius:14px;
+  padding:18px 18px 16px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+  margin-bottom:10px;
+  transition:border-color .15s,transform .1s;
+  -webkit-tap-highlight-color:transparent;
+}
+.deliverable:hover{border-color:var(--hairline-2)}
+.deliverable:active{transform:scale(.995)}
+
+.deliverable-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.deliverable-icon svg{width:22px;height:22px;stroke-width:1.8}
+.deliverable-icon.report{background:rgba(59,130,246,.10);color:var(--brand-blue);border:1px solid rgba(59,130,246,.20)}
+.deliverable-icon.sop{background:rgba(16,185,129,.10);color:var(--good);border:1px solid rgba(16,185,129,.20)}
+.deliverable-icon.framework{background:rgba(139,92,246,.10);color:var(--pillar-team);border:1px solid rgba(139,92,246,.20)}
+.deliverable-icon.gate{background:rgba(245,158,11,.10);color:var(--warn);border:1px solid rgba(245,158,11,.20)}
+.deliverable-icon.story{background:rgba(200,30,45,.10);color:var(--severe);border:1px solid rgba(200,30,45,.20)}
+.deliverable-icon.stress{background:rgba(245,158,11,.10);color:var(--warn);border:1px solid rgba(245,158,11,.20)}
+
+.deliverable-body{flex:1;min-width:0}
+.deliverable-title{
+  font-size:14px;font-weight:600;color:var(--text-strong);
+  line-height:1.3;margin-bottom:4px;
+}
+.deliverable-meta{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.deliverable-meta .sep{opacity:.4}
+.deliverable-meta .type-tag{
+  font-weight:600;
+}
+.deliverable-meta .type-tag.report{color:var(--brand-blue)}
+.deliverable-meta .type-tag.sop{color:var(--good)}
+.deliverable-meta .type-tag.framework{color:var(--pillar-team)}
+.deliverable-meta .type-tag.gate{color:var(--warn)}
+.deliverable-meta .type-tag.story{color:var(--severe)}
+.deliverable-meta .type-tag.stress{color:var(--warn)}
+
+.deliverable-desc{
+  font-size:12px;color:var(--muted);
+  line-height:1.45;
+}
+.deliverable-actions{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:8px;
+  align-self:center;
+}
+.del-btn{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  transition:background .15s,color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.del-btn:hover{background:var(--brand-blue);color:#fff}
+.del-btn svg{width:16px;height:16px;stroke-width:2}
+.del-btn.primary{background:var(--brand-blue);color:#fff}
+.del-btn.primary:hover{background:var(--blue-dark)}
+
+@media (max-width:520px){
+  .deliverable-actions{flex-direction:column;gap:6px}
+  .del-btn{width:32px;height:32px}
+  .del-btn svg{width:14px;height:14px}
+}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  padding:48px 20px;text-align:center;
+  background:var(--surface);
+  border:1px dashed var(--hairline-2);
+  border-radius:14px;
+  display:none;
+}
+.empty-state.show{display:block}
+.empty-state-icon{
+  width:56px;height:56px;border-radius:14px;margin:0 auto 16px;
+  background:rgba(255,255,255,.04);color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+}
+.empty-state-icon svg{width:26px;height:26px;stroke-width:1.6}
+.empty-state-title{
+  font-family:var(--font-display);
+  font-size:18px;font-weight:700;color:var(--text-strong);
+  letter-spacing:-.2px;margin-bottom:6px;
+}
+.empty-state-text{font-size:13px;color:var(--muted);max-width:300px;margin:0 auto;line-height:1.5}
+
+/* ── DESKTOP ── */
+@media (min-width:768px){
+  .vault-stats{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div id="portal-nav" data-active="vault"></div>
+
+<main class="page">
+
+  <div class="greeting fade d1">
+    <div class="greeting-eyebrow">Deliverable Vault</div>
+    <h1 class="greeting-h1">Everything Built So Far</h1>
+    <p class="greeting-sub">Reports, SOPs, frameworks, stress tests · permanent archive</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="vault-stats fade d2">
+    <div class="vault-stat">
+      <div class="vault-stat-label">Total</div>
+      <div class="vault-stat-value">8</div>
+      <div class="vault-stat-sub">deliverables in vault</div>
+    </div>
+    <div class="vault-stat">
+      <div class="vault-stat-label">SOPs</div>
+      <div class="vault-stat-value">3</div>
+      <div class="vault-stat-sub">5 more queued</div>
+    </div>
+    <div class="vault-stat">
+      <div class="vault-stat-label">Reports</div>
+      <div class="vault-stat-value">2</div>
+      <div class="vault-stat-sub">phase + diagnostic</div>
+    </div>
+    <div class="vault-stat" style="display:none">
+      <div class="vault-stat-label">This week</div>
+      <div class="vault-stat-value">2</div>
+      <div class="vault-stat-sub">new this week</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="vault-search fade d2">
+    <span class="vault-search-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    </span>
+    <input type="text" id="vaultSearch" placeholder="Search deliverables by name or pillar...">
+  </div>
+
+  <!-- Filter chips -->
+  <div class="filter-row fade d3">
+    <button class="filter-chip active" data-filter="all">All <span class="count">8</span></button>
+    <button class="filter-chip" data-filter="report">Reports <span class="count">2</span></button>
+    <button class="filter-chip" data-filter="sop">SOPs <span class="count">3</span></button>
+    <button class="filter-chip" data-filter="framework">Frameworks <span class="count">2</span></button>
+    <button class="filter-chip" data-filter="gate">Gate Reviews <span class="count">2</span></button>
+    <button class="filter-chip" data-filter="stress">Stress Tests <span class="count">0</span></button>
+  </div>
+
+  <!-- Empty state (shown when filter returns nothing) -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-state-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+    </div>
+    <div class="empty-state-title">Nothing here yet</div>
+    <div class="empty-state-text">This category fills as the install progresses. Stress tests appear at Phase 4.</div>
+  </div>
+
+  <!-- Deliverable list grouped by phase -->
+  <div class="vault-list">
+
+    <!-- PHASE 3 (current) -->
+    <div class="vault-group" data-group="phase3">
+      <div class="vault-group-label">Phase 3 · Build · Days 43–105</div>
+
+      <div class="deliverable fade d3" data-type="sop" data-search="sop-03 daily standup operations">
+        <div class="deliverable-icon sop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">SOP-03 · Daily Standup Cadence</div>
+          <div class="deliverable-meta">
+            <span class="type-tag sop">SOP</span>
+            <span class="sep">·</span>
+            <span>Pillar 1 · Operations</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 62</span>
+          </div>
+          <div class="deliverable-desc">15-min daily standup format, agenda template, and escalation rules for the operating team.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn" aria-label="View"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary" aria-label="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d3" data-type="sop" data-search="sop-02 vendor management operations">
+        <div class="deliverable-icon sop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">SOP-02 · Vendor Management</div>
+          <div class="deliverable-meta">
+            <span class="type-tag sop">SOP</span>
+            <span class="sep">·</span>
+            <span>Pillar 1 · Operations</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 55</span>
+          </div>
+          <div class="deliverable-desc">Vendor onboarding checklist, SLA template, quarterly review cadence, and termination protocol.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d4" data-type="sop" data-search="sop-01 sales process revenue">
+        <div class="deliverable-icon sop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3 7-7"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">SOP-01 · Sales Process</div>
+          <div class="deliverable-meta">
+            <span class="type-tag sop">SOP</span>
+            <span class="sep">·</span>
+            <span>Pillar 2 · Revenue</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 49</span>
+          </div>
+          <div class="deliverable-desc">Five-stage pipeline architecture, exit criteria, stage probability weights, and forecast methodology.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="vault-group" data-group="phase2">
+      <div class="vault-group-label">Phase 2 · Design · Days 22–42</div>
+
+      <div class="deliverable fade d4" data-type="gate" data-search="gate 2 review design phase">
+        <div class="deliverable-icon gate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">Gate 2 Review · Design Phase Sign-Off</div>
+          <div class="deliverable-meta">
+            <span class="type-tag gate">Gate Review</span>
+            <span class="sep">·</span>
+            <span>Score: 161 / 240</span>
+            <span class="sep">·</span>
+            <span>Day 42</span>
+          </div>
+          <div class="deliverable-desc">Full execution plan approved. Build priorities sequenced. Score progression: 142 → 161 (+19).</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d5" data-type="framework" data-search="execution plan 180 day roadmap">
+        <div class="deliverable-icon framework">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">180-Day Execution Plan</div>
+          <div class="deliverable-meta">
+            <span class="type-tag framework">Framework</span>
+            <span class="sep">·</span>
+            <span>All 4 Pillars</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 38</span>
+          </div>
+          <div class="deliverable-desc">Full 180-day sequencing across all 40 factors. Gate-by-gate deliverables, dependencies, and ownership.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d5" data-type="framework" data-search="build priority matrix sequence">
+        <div class="deliverable-icon framework">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">Build Priority Matrix</div>
+          <div class="deliverable-meta">
+            <span class="type-tag framework">Framework</span>
+            <span class="sep">·</span>
+            <span>All 4 Pillars</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 32</span>
+          </div>
+          <div class="deliverable-desc">Impact × effort scoring across all 40 factors. Drives Phase 3 build sequencing decisions.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 1 -->
+    <div class="vault-group" data-group="phase1">
+      <div class="vault-group-label">Phase 1 · Diagnose · Days 1–21</div>
+
+      <div class="deliverable fade d5" data-type="gate" data-search="gate 1 review diagnose phase">
+        <div class="deliverable-icon gate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12l5 5L20 7"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">Gate 1 Review · Diagnose Phase Sign-Off</div>
+          <div class="deliverable-meta">
+            <span class="type-tag gate">Gate Review</span>
+            <span class="sep">·</span>
+            <span>Score: 142 / 240</span>
+            <span class="sep">·</span>
+            <span>Day 21</span>
+          </div>
+          <div class="deliverable-desc">Baseline score established. Diagnostic accepted. Build path approved.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d6" data-type="report" data-search="diagnosis report x-ray 40 factor">
+        <div class="deliverable-icon report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">Full Diagnosis Report</div>
+          <div class="deliverable-meta">
+            <span class="type-tag report">Report</span>
+            <span class="sep">·</span>
+            <span>All 4 Pillars · 40 Factors</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 18</span>
+          </div>
+          <div class="deliverable-desc">Complete X-Ray across all 40 factors. Severity ratings, dollar-cost-of-broken, fix priority. Source of truth for the install.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="deliverable fade d6" data-type="report" data-search="x-ray score baseline diagnostic">
+        <div class="deliverable-icon report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+        </div>
+        <div class="deliverable-body">
+          <div class="deliverable-title">X-Ray Baseline Score Report</div>
+          <div class="deliverable-meta">
+            <span class="type-tag report">Report</span>
+            <span class="sep">·</span>
+            <span>Score: 142 / 240 · Rebuild Tier</span>
+            <span class="sep">·</span>
+            <span>Delivered Day 8</span>
+          </div>
+          <div class="deliverable-desc">Initial X-Ray. Pillar-by-pillar baseline. Used to anchor every score conversation that follows.</div>
+        </div>
+        <div class="deliverable-actions">
+          <a href="#" class="del-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+          <a href="#" class="del-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v14m0 0l-5-5m5 5l5-5M5 18v3h14v-3"/></svg></a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="shared/portal-nav.js"></script>
+<script src="shared/portal-demo.js"></script>
+<script>
+const items = document.querySelectorAll('.deliverable');
+const groups = document.querySelectorAll('.vault-group');
+const chips = document.querySelectorAll('.filter-chip');
+const searchInput = document.getElementById('vaultSearch');
+const emptyState = document.getElementById('emptyState');
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function applyFilters(){
+  let visibleCount = 0;
+  items.forEach(item=>{
+    const type = item.dataset.type;
+    const searchText = item.dataset.search || '';
+
+    let visible = true;
+    if(currentFilter !== 'all' && currentFilter !== type) visible = false;
+    if(currentSearch && !searchText.toLowerCase().includes(currentSearch.toLowerCase())) visible = false;
+
+    item.style.display = visible ? '' : 'none';
+    if(visible) visibleCount++;
+  });
+
+  // Hide groups with no visible items
+  groups.forEach(group=>{
+    const visibleInGroup = group.querySelectorAll('.deliverable:not([style*="display: none"])');
+    group.style.display = visibleInGroup.length ? '' : 'none';
+  });
+
+  // Toggle empty state
+  emptyState.classList.toggle('show', visibleCount === 0);
+}
+
+chips.forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    chips.forEach(c=>c.classList.toggle('active', c===chip));
+    currentFilter = chip.dataset.filter;
+    applyFilters();
+  });
+});
+
+searchInput.addEventListener('input',(e)=>{
+  currentSearch = e.target.value;
+  applyFilters();
+});
+</script>
+</body>
+</html>
